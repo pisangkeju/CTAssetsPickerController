@@ -28,7 +28,7 @@
 #import "CTAssetsPickerConstants.h"
 #import "CTAssetsPickerController.h"
 #import "CTAssetsGroupViewController.h"
-
+#import "CTAssetsViewController.h"
 
 
 NSString * const CTAssetsPickerSelectedAssetsChangedNotification = @"CTAssetsPickerSelectedAssetsChangedNotification";
@@ -65,6 +65,25 @@ NSString * const CTAssetsPickerSelectedAssetsChangedNotification = @"CTAssetsPic
     
     return self;
 }
+
+- (id)initWithGroup:(ALAssetsGroup *)group{
+    
+    CTAssetsViewController *vc = [[CTAssetsViewController alloc]init];
+    vc.assetsGroup = group;
+    if (self = [super initWithRootViewController:vc]){
+        _assetsLibrary      = [self.class defaultAssetsLibrary];
+        _assetsFilter       = [ALAssetsFilter allAssets];
+        _selectedAssets     = [[NSMutableArray alloc] init];
+        _showsCancelButton  = YES;
+        
+        self.preferredContentSize = kPopoverContentSize;
+        
+        [self addKeyValueObserver];
+    }
+    
+    return self;
+}
+
 
 - (void)viewDidLoad
 {

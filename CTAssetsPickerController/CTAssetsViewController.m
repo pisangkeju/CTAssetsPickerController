@@ -158,7 +158,7 @@ NSString * const CTAssetsSupplementaryViewIdentifier = @"CTAssetsSupplementaryVi
     ALAssetsGroupEnumerationResultsBlock resultsBlock = ^(ALAsset *asset, NSUInteger index, BOOL *stop)
     {
         if (asset)
-            [self.assets addObject:asset];
+            [self.assets insertObject:asset atIndex:0];
         else
             [self reloadData];
     };

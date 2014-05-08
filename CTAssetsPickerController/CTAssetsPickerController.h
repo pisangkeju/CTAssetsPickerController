@@ -37,6 +37,8 @@
  *  A controller that allows picking multiple photos and videos from user's photo library.
  */
 @interface CTAssetsPickerController : UINavigationController
+- (id)initWithGroup:(ALAssetsGroup *)group;
++ (ALAssetsLibrary *)defaultAssetsLibrary;
 
 /**
  *  The assets picker’s delegate object.
