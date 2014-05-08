@@ -38,6 +38,7 @@ NSString * const CTAssetsPickerSelectedAssetsChangedNotification = @"CTAssetsPic
 @interface CTAssetsPickerController ()
 
 @property (nonatomic, strong) ALAssetsLibrary *assetsLibrary;
+@property (nonatomic, strong) NSArray *assetsGroups;
 
 @end
 
@@ -66,19 +67,32 @@ NSString * const CTAssetsPickerSelectedAssetsChangedNotification = @"CTAssetsPic
     return self;
 }
 
-- (id)initWithGroup:(ALAssetsGroup *)group{
+- (id)initWithGroups:(NSArray *)groups{
     
     CTAssetsViewController *vc = [[CTAssetsViewController alloc]init];
-    vc.assetsGroup = group;
-    if (self = [super initWithRootViewController:vc]){
-        _assetsLibrary      = [self.class defaultAssetsLibrary];
-        _assetsFilter       = [ALAssetsFilter allAssets];
-        _selectedAssets     = [[NSMutableArray alloc] init];
-        _showsCancelButton  = YES;
+    if (groups){
+        vc.assetsGroup = groups[0];
+        if (self = [super initWithRootViewController:vc]){
+            _assetsLibrary      = [self.class defaultAssetsLibrary];
+            _assetsFilter       = [ALAssetsFilter allAssets];
+            _selectedAssets     = [[NSMutableArray alloc] init];
+            _showsCancelButton  = YES;
+            
+            _assetsGroups = groups;
+            
+            self.preferredContentSize = kPopoverContentSize;
+            
+            [self addKeyValueObserver];
+        }
         
-        self.preferredContentSize = kPopoverContentSize;
+        vc.navigationItem.leftBarButtonItem =
+        [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Switch", nil)
+                                         style:UIBarButtonItemStyleDone
+                                        target:self
+                                        action:@selector(willSwitchAssetsGroup:)];
         
-        [self addKeyValueObserver];
+    } else{
+        self = [self init];
     }
     
     return self;
@@ -158,6 +172,7 @@ NSString * const CTAssetsPickerSelectedAssetsChangedNotification = @"CTAssetsPic
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:CTAssetsPickerSelectedAssetsChangedNotification
                                                         object:sender];
+    
 }
 
 
@@ -422,6 +437,25 @@ NSString * const CTAssetsPickerSelectedAssetsChangedNotification = @"CTAssetsPic
 {
     if ([self.delegate respondsToSelector:@selector(assetsPickerController:didFinishPickingAssets:)])
         [self.delegate assetsPickerController:self didFinishPickingAssets:self.selectedAssets];
+}
+
+
+
+-(void)willSwitchAssetsGroup:(id)sender{
+    
+    CTAssetsViewController *vc = [self.viewControllers lastObject];
+    
+    int currentIndex = [self.assetsGroups indexOfObject:vc.assetsGroup];
+    int nextIndex = (currentIndex+1) % self.assetsGroups.count;
+    
+    [self setAssetsGroup:self.assetsGroups[nextIndex]];
+}
+
+- (void)setAssetsGroup:(ALAssetsGroup*)assetsGroup{
+    CTAssetsViewController *vc = [self.viewControllers lastObject];
+    vc.assetsGroup = assetsGroup;
+    [[NSNotificationCenter defaultCenter] postNotificationName:ALAssetsLibraryChangedNotification
+                                                        object:nil];
 }
 
 
